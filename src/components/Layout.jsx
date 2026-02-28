@@ -12,13 +12,13 @@ import SettingPage from '../pages/SettingPage';
 import PomodoroPage from '../pages/PomodoroPage';
 import TodayPage from '../pages/todayPage';
 import SchedulePage from '../pages/SchedulePage';
+import ReportsPage from '../pages/ReportsPage';
 
 const navItems = [
   { key: 'today', label: 'Today', icon: LayoutDashboard },
   { key: 'calendar', label: 'Calendar', icon: CalendarDays },
   { key: 'pomodoro', label: 'Pomodoro Timer', icon: Timer },
   { key: 'reports', label: 'Reports', icon: BarChart3 },
-  { key: 'setting', label: 'Setting', icon: Settings },
 ];
 
 function PageContent({ activePage }) {
@@ -31,6 +31,8 @@ function PageContent({ activePage }) {
       return <SettingPage />;
     case 'pomodoro':
       return <PomodoroPage />;
+    case 'reports':
+      return <ReportsPage />;
     default: {
       const page = navItems.find((n) => n.key === activePage);
       return (
@@ -61,19 +63,19 @@ export default function Layout({ onSignOut }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-[#282c34] font-sans">
       {/* ── Top Navigation Bar ── */}
-      <header className="sticky top-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-200/60 px-6 py-2.5">
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-[#21252b] border-b border-[#3e4451] px-6 py-6">
         {/* Left — Logo */}
         <div className="flex items-center gap-2 min-w-[140px]">
-          <div className="h-8 w-8 rounded-lg bg-neutral-900 flex items-center justify-center">
-            <Link className="h-4 w-4 text-white" />
+          <div className="h-8 w-8 rounded-lg bg-[#61afef] flex items-center justify-center">
+            <Link className="h-4 w-4 text-[#282c34]" />
           </div>
-          <span className="text-lg font-bold text-neutral-900 tracking-tight">Knot</span>
+          <span className="text-lg font-bold text-[#abb2bf] tracking-tight">Knot</span>
         </div>
 
         {/* Center — Pill Nav */}
-        <nav className="bg-gray-100 rounded-full px-2 py-1.5 flex items-center gap-1">
+        <nav className="bg-[#181a1f] rounded-full px-2 py-1.5 flex items-center gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activePage === item.key;
@@ -85,8 +87,8 @@ export default function Layout({ onSignOut }) {
                   flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 cursor-pointer
                   ${
                     isActive
-                      ? 'bg-white text-neutral-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-[#3e4451] text-[#61afef] shadow-sm'
+                      : 'text-[#5c6370] hover:text-[#abb2bf]'
                   }
                 `}
               >
@@ -101,28 +103,39 @@ export default function Layout({ onSignOut }) {
         <div className="flex items-center justify-end min-w-[140px] relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold cursor-pointer ring-2 ring-white shadow-sm transition hover:shadow-md"
+            className="h-9 w-9 rounded-full bg-gradient-to-br from-[#c678dd] to-[#61afef] flex items-center justify-center text-[#282c34] text-sm font-semibold cursor-pointer ring-2 ring-[#3e4451] shadow-sm transition hover:shadow-md"
           >
             AJ
           </button>
 
           {/* Dropdown */}
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-200/60 py-2">
+            <div className="absolute right-0 top-full mt-2 w-60 bg-[#21252b] rounded-xl shadow-lg border border-[#3e4451] py-2">
               {/* User Info */}
               <div className="px-4 py-2">
-                <p className="text-sm font-semibold text-neutral-900">John Dee</p>
-                <p className="text-xs text-gray-400 mt-1">John.Dj@ku.th</p>
+                <p className="text-sm font-semibold text-[#abb2bf]">John Dee</p>
+                <p className="text-xs text-[#5c6370] mt-1">John.Dj@ku.th</p>
               </div>
-              <div className="mx-3 my-1.5 h-px bg-gray-100" />
+              <div className="mx-3 my-1.5 h-px bg-[#3e4451]" />
+              <button
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setActivePage('setting');
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#abb2bf] hover:bg-[#2c313a] transition cursor-pointer"
+              >
+                <Settings className="h-4 w-4 text-[#5c6370]" />
+                Settings
+              </button>
+              <div className="mx-3 my-1.5 h-px bg-[#3e4451]" />
               <button
                 onClick={() => {
                   setDropdownOpen(false);
                   if (onSignOut) onSignOut();
                 }}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#e06c75] hover:bg-[#e06c75]/10 transition cursor-pointer"
               >
-                <LogOut className="h-4 w-4 text-red-400" />
+                <LogOut className="h-4 w-4 text-[#e06c75]" />
                 Sign out
               </button>
             </div>

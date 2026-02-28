@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RotateCcw, Play, Pause, SkipForward, Maximize2, Minimize2 } from 'lucide-react';
 
-// The full pomodoro cycle: F S F S F S F L (8 steps)
-// F = focus, S = short break, L = long break
 const CYCLE = ['focus', 'short', 'focus', 'short', 'focus', 'short', 'focus', 'long'];
 
 const MODE_CONFIG = {
-  focus:  { label: 'Focus',       seconds: 25 * 60 },
-  short:  { label: 'Short Break', seconds:  5 * 60 },
-  long:   { label: 'Long Break',  seconds: 15 * 60 },
+  focus:  { label: 'โฟกัส',       seconds: 25 * 60 },
+  short:  { label: 'พักสั้น',     seconds:  5 * 60 },
+  long:   { label: 'พักยาว',      seconds: 15 * 60 },
 };
 
 const TABS = ['focus', 'short', 'long'];
@@ -22,14 +20,12 @@ export default function PomodoroPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const intervalRef = useRef(null);
 
-  // Timer tick
   useEffect(() => {
     if (isRunning && totalSeconds > 0) {
       intervalRef.current = setInterval(() => {
         setTotalSeconds((prev) => prev - 1);
       }, 1000);
     } else if (totalSeconds === 0 && isRunning) {
-      // Auto-advance when timer hits zero
       setIsRunning(false);
       advanceCycle();
     }
@@ -39,7 +35,6 @@ export default function PomodoroPage() {
   const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
   const seconds = String(totalSeconds % 60).padStart(2, '0');
 
-  // Count completed focus sessions from cycle index
   const getFocusCount = useCallback((idx) => {
     let count = 0;
     for (let i = 0; i < idx; i++) {
@@ -74,7 +69,6 @@ export default function PomodoroPage() {
 
   const handleSkip = useCallback(() => {
     setIsRunning(false);
-    // If current step is focus, count it as completed
     if (CYCLE[cycleIndex] === 'focus') {
       setCompletedFocus((prev) => Math.min(prev + 1, 4));
     }
@@ -84,15 +78,15 @@ export default function PomodoroPage() {
   const timerContent = (
     <div className="flex flex-col items-center justify-center flex-1">
       {/* Mode Tabs */}
-      <div className="bg-gray-100 rounded-full px-1.5 py-1 flex items-center gap-1 mb-16">
+      <div className="bg-[#eef0f5] rounded-full px-1.5 py-1 flex items-center gap-1 mb-16">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => handleTabClick(tab)}
-            className={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 cursor-pointer ${
+            className={`rounded-full px-5 py-2.5 text-base font-medium transition-all duration-200 cursor-pointer leading-relaxed ${
               mode === tab
-                ? 'bg-white text-neutral-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-[#61afef] shadow-sm'
+                : 'text-[#6b7280] hover:text-[#1a1d23]'
             }`}
           >
             {MODE_CONFIG[tab].label}
@@ -102,7 +96,7 @@ export default function PomodoroPage() {
 
       {/* Timer Display */}
       <div className="mb-16">
-        <span className="text-9xl font-extralight text-neutral-900 tracking-tight tabular-nums select-none">
+        <span className="text-9xl font-extralight text-[#1a1d23] tracking-tight tabular-nums select-none">
           {minutes}:{seconds}
         </span>
       </div>
@@ -111,27 +105,27 @@ export default function PomodoroPage() {
       <div className="flex items-center gap-6 mb-16">
         <button
           onClick={handleReset}
-          className="h-12 w-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95 cursor-pointer shadow-sm"
-          title="Reset"
+          className="h-12 w-12 rounded-full border border-[#e1e4ec] bg-white flex items-center justify-center text-[#6b7280] transition hover:bg-[#eef0f5] hover:text-[#1a1d23] active:scale-95 cursor-pointer shadow-sm"
+          title="รีเซ็ต"
         >
           <RotateCcw className="h-5 w-5" />
         </button>
 
         <button
           onClick={handleToggle}
-          className="h-16 px-10 rounded-full bg-neutral-900 flex items-center justify-center gap-2.5 text-white text-sm font-semibold transition hover:bg-neutral-800 active:scale-[0.97] cursor-pointer shadow-lg"
+          className="h-16 px-10 rounded-full bg-[#61afef] flex items-center justify-center gap-2.5 text-white text-base font-semibold transition hover:bg-[#4d9fd9] active:scale-[0.97] cursor-pointer shadow-lg leading-relaxed"
         >
           {isRunning ? (
-            <><Pause className="h-5 w-5" /> Pause</>
+            <><Pause className="h-5 w-5" /> หยุดชั่วคราว</>
           ) : (
-            <><Play className="h-5 w-5" /> Start</>
+            <><Play className="h-5 w-5" /> เริ่ม</>
           )}
         </button>
 
         <button
           onClick={handleSkip}
-          className="h-12 w-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95 cursor-pointer shadow-sm"
-          title="Skip"
+          className="h-12 w-12 rounded-full border border-[#e1e4ec] bg-white flex items-center justify-center text-[#6b7280] transition hover:bg-[#eef0f5] hover:text-[#1a1d23] active:scale-95 cursor-pointer shadow-sm"
+          title="ข้าม"
         >
           <SkipForward className="h-5 w-5" />
         </button>
@@ -144,10 +138,10 @@ export default function PomodoroPage() {
             key={i}
             className={`h-3 w-3 rounded-full transition-colors duration-300 ${
               i < completedFocus
-                ? 'bg-neutral-900'
+                ? 'bg-[#61afef]'
                 : i === completedFocus && mode === 'focus'
-                  ? 'bg-neutral-400'
-                  : 'bg-gray-200'
+                  ? 'bg-[#d1d5db]'
+                  : 'bg-[#e1e4ec]'
             }`}
           />
         ))}
@@ -155,16 +149,14 @@ export default function PomodoroPage() {
     </div>
   );
 
-  // Fullscreen overlay
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-[100] bg-gray-50 flex flex-col">
-        {/* Minimize button */}
+      <div className="fixed inset-0 z-[100] bg-[#f5f6fa] flex flex-col">
         <div className="absolute top-5 right-5">
           <button
             onClick={() => setIsFullscreen(false)}
-            className="h-10 w-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 cursor-pointer shadow-sm"
-            title="Exit fullscreen"
+            className="h-10 w-10 rounded-full border border-[#e1e4ec] bg-white flex items-center justify-center text-[#6b7280] transition hover:bg-[#eef0f5] hover:text-[#1a1d23] cursor-pointer shadow-sm"
+            title="ย่อหน้าจอ"
           >
             <Minimize2 className="h-4 w-4" />
           </button>
@@ -174,15 +166,13 @@ export default function PomodoroPage() {
     );
   }
 
-  // Normal (embedded in layout)
   return (
-    <div className="relative flex flex-col" style={{ minHeight: 'calc(100vh - 57px)' }}>
-      {/* Fullscreen button */}
+    <div className="relative flex flex-col bg-[#f5f6fa]" style={{ minHeight: 'calc(100vh - 57px)' }}>
       <div className="absolute top-5 right-5">
         <button
           onClick={() => setIsFullscreen(true)}
-          className="h-10 w-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 cursor-pointer shadow-sm"
-          title="Focus mode"
+          className="h-10 w-10 rounded-full border border-[#e1e4ec] bg-white flex items-center justify-center text-[#6b7280] transition hover:bg-[#eef0f5] hover:text-[#1a1d23] cursor-pointer shadow-sm"
+          title="เต็มจอ"
         >
           <Maximize2 className="h-4 w-4" />
         </button>
