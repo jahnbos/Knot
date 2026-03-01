@@ -1,0 +1,56 @@
+# Knot 🪢
+
+Knot เป็นหน้าเว็บแอปพลิเคชัน (Web Application) ที่เน้นด้านการจัดการแอป โพรดักทิวิตี้ (Productivity) และแดชบอร์ดติดตามงาน โดยให้ความสำคัญกับการออกแบบ UX/UI ที่ทันสมัย สวยงาม และประสบการณ์การใช้งานที่ดีเยี่ยม
+
+## 🌟 ฟีเจอร์หลัก (Key Features)
+
+- **Dashboard & Reports:** หน้าแสดงผลภาพรวมและรายงานที่มีทั้งแผนภูมิแท่ง (Bar Chart) แสดงงานที่วางแผน/เสร็จสิ้น, แผนภูมิเส้น (Line Chart) และการออกแบบ KPI Cards ที่อ่านง่าย
+- **Theming:** รองรับการเปลี่ยนธีมทั้ง Light Mode, Dark Mode และ Sepia Theme
+- **Localization:** รองรับการใช้งานแบบหลายภาษา รวมถึงปรับแต่ง Typography ให้เหมาะสมกับภาษาไทย
+- **Modern UI Components:** ไอคอนสวยงามจาก Lucide React และจัดสไตล์ UI อย่างมีประสิทธิภาพด้วย Tailwind CSS
+
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
+
+- **Core:** [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **Code Quality:** ESLint
+
+---
+
+## 🚀 วิธีติดตั้งและรันโปรเจค (How to Run)
+
+ระบบนี้ใช้ Node.js และแพ็กเกจเมเนเจอร์อย่าง `npm` (หรือตัวอื่น ๆ เช่น `yarn`, `pnpm` ก็สามารถใช้ได้เช่นกัน)
+
+### 1. ติดตั้ง Dependencies
+
+เปิด Terminal ในโฟลเดอร์โปรเจคและรันคำสั่งเพื่อโหลดไลบรารีทั้งหมดที่จำเป็น:
+
+```bash
+npm install
+```
+
+### 2. รันหน้าเว็บ (Development Mode)
+
+ใช้คำสั่งนี้เพื่อเปิดลีดเซิร์ฟเวอร์จำลองสำหรับการพัฒนา:
+
+```bash
+npm run dev
+```
+
+> **หมายเหตุ:** หลังจากรันคำสั่ง ระบบจะแสดง URL (เช่น `http://localhost:5173/`) ให้คลิกหรือนำไปเปิดใน Web Browser ได้เลย
+
+### 3. คำสั่งอื่นๆ ที่มีประโยชน์
+
+- **Build ระบบ:** นำโค้ดโปรดักชันไปใช้งานจริง
+  ```bash
+  npm run build
+  ```
+- **Preview ระบบที่ Build แล้ว:** ใช้ดูตัวอย่างผลลัพธ์ของเวอร์ชันจริง
+  ```bash
+  npm run preview
+  ```
+- **ตรวจสอบ Syntax ของ Code:**
+  ```bash
+  npm run lint
+  ```
