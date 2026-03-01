@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Timer, Bell, Save, Volume2, BellRing, BellOff, MessageSquare, Clock } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const menuItems = [
   { key: 'timer', label: 'ตั้งค่าเวลา', icon: Timer },
@@ -8,228 +9,120 @@ const menuItems = [
 
 function Toggle({ enabled, onToggle }) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
-        enabled ? 'bg-[#61afef]' : 'bg-[#d1d5db]'
-      }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        }`}
-      />
+    <button type="button" onClick={onToggle}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${enabled ? 'bg-[#61afef]' : ''}`}
+      style={{ backgroundColor: enabled ? undefined : 'var(--border)' }}>
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
   );
 }
 
-function TimerContent({
-  focusDuration, setFocusDuration,
-  shortBreak, setShortBreak,
-  longBreak, setLongBreak,
-  autoStart, setAutoStart,
-  sounds, setSounds,
-  darkMode, setDarkMode,
-}) {
+function TimerContent({ focusDuration, setFocusDuration, shortBreak, setShortBreak, longBreak, setLongBreak, autoStart, setAutoStart, sounds, setSounds, isDark, toggleTheme }) {
+  const inputCls = "w-full rounded-lg px-3 py-2.5 text-base outline-none transition";
   return (
     <>
-      <h2 className="text-xl font-semibold text-[#1a1d23] mb-4 leading-relaxed">ตั้งค่า Pomodoro</h2>
+      <h2 className="text-xl font-semibold mb-4 leading-relaxed" style={{ color: 'var(--text-primary)' }}>ตั้งค่า Pomodoro</h2>
       <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label htmlFor="focus" className="block text-base font-medium text-[#6b7280] mb-1.5 leading-relaxed">
-            โฟกัส (นาที)
-          </label>
-          <input
-            id="focus"
-            type="number"
-            value={focusDuration}
-            onChange={(e) => setFocusDuration(Number(e.target.value))}
-            className="w-full rounded-lg border border-[#e1e4ec] bg-[#f5f6fa] px-3 py-2.5 text-base text-[#1a1d23] outline-none focus:border-[#61afef] focus:ring-2 focus:ring-[#61afef]/20 transition"
-          />
-        </div>
-        <div>
-          <label htmlFor="shortBreak" className="block text-base font-medium text-[#6b7280] mb-1.5 leading-relaxed">
-            พักสั้น (นาที)
-          </label>
-          <input
-            id="shortBreak"
-            type="number"
-            value={shortBreak}
-            onChange={(e) => setShortBreak(Number(e.target.value))}
-            className="w-full rounded-lg border border-[#e1e4ec] bg-[#f5f6fa] px-3 py-2.5 text-base text-[#1a1d23] outline-none focus:border-[#61afef] focus:ring-2 focus:ring-[#61afef]/20 transition"
-          />
-        </div>
-        <div>
-          <label htmlFor="longBreak" className="block text-base font-medium text-[#6b7280] mb-1.5 leading-relaxed">
-            พักยาว (นาที)
-          </label>
-          <input
-            id="longBreak"
-            type="number"
-            value={longBreak}
-            onChange={(e) => setLongBreak(Number(e.target.value))}
-            className="w-full rounded-lg border border-[#e1e4ec] bg-[#f5f6fa] px-3 py-2.5 text-base text-[#1a1d23] outline-none focus:border-[#61afef] focus:ring-2 focus:ring-[#61afef]/20 transition"
-          />
-        </div>
+        {[
+          { id: 'focus', label: 'โฟกัส (นาที)', value: focusDuration, setter: setFocusDuration },
+          { id: 'shortBreak', label: 'พักสั้น (นาที)', value: shortBreak, setter: setShortBreak },
+          { id: 'longBreak', label: 'พักยาว (นาที)', value: longBreak, setter: setLongBreak },
+        ].map(({ id, label, value, setter }) => (
+          <div key={id}>
+            <label htmlFor={id} className="block text-base font-medium mb-1.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{label}</label>
+            <input id={id} type="number" value={value} onChange={(e) => setter(Number(e.target.value))}
+              className={inputCls} style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} />
+          </div>
+        ))}
       </div>
 
-      <div className="my-6 h-px bg-[#e1e4ec]" />
+      <div className="my-6 h-px" style={{ backgroundColor: 'var(--border)' }} />
 
-      <h2 className="text-xl font-semibold text-[#1a1d23] mb-4 leading-relaxed">การตั้งค่าทั่วไป</h2>
+      <h2 className="text-xl font-semibold mb-4 leading-relaxed" style={{ color: 'var(--text-primary)' }}>การตั้งค่าทั่วไป</h2>
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-base font-medium text-[#1a1d23] leading-relaxed">เริ่มรอบถัดไปอัตโนมัติ</p>
-            <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">เริ่ม Pomodoro หรือพักรอบถัดไปโดยอัตโนมัติ</p>
+        {[
+          { title: 'เริ่มรอบถัดไปอัตโนมัติ', desc: 'เริ่ม Pomodoro หรือพักรอบถัดไปโดยอัตโนมัติ', enabled: autoStart, onToggle: () => setAutoStart(!autoStart) },
+          { title: 'เสียงแจ้งเตือน', desc: 'เล่นเสียงเมื่อรอบเวลาจบ', enabled: sounds, onToggle: () => setSounds(!sounds) },
+          { title: 'โหมดมืด', desc: 'เปลี่ยนสีธีมเป็นโทนมืด', enabled: isDark, onToggle: toggleTheme },
+        ].map(({ title, desc, enabled, onToggle }) => (
+          <div key={title} className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>{title}</p>
+              <p className="text-sm mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
+            </div>
+            <Toggle enabled={enabled} onToggle={onToggle} />
           </div>
-          <Toggle enabled={autoStart} onToggle={() => setAutoStart(!autoStart)} />
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-base font-medium text-[#1a1d23] leading-relaxed">เสียงแจ้งเตือน</p>
-            <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">เล่นเสียงเมื่อรอบเวลาจบ</p>
-          </div>
-          <Toggle enabled={sounds} onToggle={() => setSounds(!sounds)} />
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-base font-medium text-[#1a1d23] leading-relaxed">โหมดมืด</p>
-            <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">เปลี่ยนสีธีมเป็นโทนมืด</p>
-          </div>
-          <Toggle enabled={darkMode} onToggle={() => setDarkMode(!darkMode)} />
-        </div>
+        ))}
       </div>
 
       <div className="mt-8 flex justify-end">
-        <button
-          type="button"
-          onClick={() => console.log('Settings saved')}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#61afef] px-5 py-2.5 text-base font-semibold text-white transition hover:bg-[#4d9fd9] active:scale-[0.98] cursor-pointer leading-relaxed"
-        >
-          <Save className="h-5 w-5" />
-          บันทึกการเปลี่ยนแปลง
+        <button type="button" onClick={() => console.log('Settings saved')}
+          className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-base font-semibold text-white transition active:scale-[0.98] cursor-pointer leading-relaxed shadow-md hover:-translate-y-0.5"
+          style={{ backgroundColor: 'var(--accent)' }}>
+          <Save className="h-5 w-5" /> บันทึกการเปลี่ยนแปลง
         </button>
       </div>
     </>
   );
 }
 
-function NotificationsContent({
-  sessionReminder, setSessionReminder,
-  breakReminder, setBreakReminder,
-  soundAlerts, setSoundAlerts,
-  dailySummary, setDailySummary,
-  doNotDisturb, setDoNotDisturb,
-  reminderBefore, setReminderBefore,
-}) {
+function NotificationRow({ icon: Icon, iconBg, iconColor, title, desc, control }) {
   return (
-    <>
-      <h2 className="text-xl font-semibold text-[#1a1d23] mb-4 leading-relaxed">ตั้งค่าการแจ้งเตือน</h2>
-
-      <h3 className="text-base font-semibold text-[#6b7280] uppercase tracking-wider mb-3 leading-relaxed">การแจ้งเตือน</h3>
-      <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#98c379]/10 flex items-center justify-center">
-              <BellRing className="h-5 w-5 text-[#98c379]" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-[#1a1d23] leading-relaxed">รอบเสร็จสิ้น</p>
-              <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">แจ้งเตือนเมื่อรอบโฟกัสหรือพักจบลง</p>
-            </div>
-          </div>
-          <Toggle enabled={sessionReminder} onToggle={() => setSessionReminder(!sessionReminder)} />
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: iconBg }}>
+          <Icon className="h-5 w-5" style={{ color: iconColor }} />
         </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#61afef]/10 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-[#61afef]" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-[#1a1d23] leading-relaxed">เตือนให้พัก</p>
-              <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">เตือนให้พักหลังจากโฟกัสเสร็จ</p>
-            </div>
-          </div>
-          <Toggle enabled={breakReminder} onToggle={() => setBreakReminder(!breakReminder)} />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#e5c07b]/10 flex items-center justify-center">
-              <Volume2 className="h-5 w-5 text-[#e5c07b]" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-[#1a1d23] leading-relaxed">เสียงแจ้งเตือน</p>
-              <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">เล่นเสียงเมื่อมีการแจ้งเตือน</p>
-            </div>
-          </div>
-          <Toggle enabled={soundAlerts} onToggle={() => setSoundAlerts(!soundAlerts)} />
+        <div>
+          <p className="text-base font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>{title}</p>
+          <p className="text-sm mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
         </div>
       </div>
+      {control}
+    </div>
+  );
+}
 
-      <div className="my-6 h-px bg-[#e1e4ec]" />
-
-      <h3 className="text-base font-semibold text-[#6b7280] uppercase tracking-wider mb-3 leading-relaxed">สรุปผลและกำหนดการ</h3>
+function NotificationsContent({ sessionReminder, setSessionReminder, breakReminder, setBreakReminder, soundAlerts, setSoundAlerts, dailySummary, setDailySummary, doNotDisturb, setDoNotDisturb, reminderBefore, setReminderBefore }) {
+  return (
+    <>
+      <h2 className="text-xl font-semibold mb-4 leading-relaxed" style={{ color: 'var(--text-primary)' }}>ตั้งค่าการแจ้งเตือน</h2>
+      <h3 className="text-base font-semibold uppercase tracking-wider mb-3 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>การแจ้งเตือน</h3>
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#c678dd]/10 flex items-center justify-center">
-              <MessageSquare className="h-5 w-5 text-[#c678dd]" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-[#1a1d23] leading-relaxed">สรุปผลรายวัน</p>
-              <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">รับสรุปสถิติการโฟกัสในแต่ละวัน</p>
-            </div>
-          </div>
-          <Toggle enabled={dailySummary} onToggle={() => setDailySummary(!dailySummary)} />
-        </div>
+        <NotificationRow icon={BellRing} iconBg="rgba(152,195,121,0.1)" iconColor="#98c379" title="รอบเสร็จสิ้น" desc="แจ้งเตือนเมื่อรอบโฟกัสหรือพักจบลง"
+          control={<Toggle enabled={sessionReminder} onToggle={() => setSessionReminder(!sessionReminder)} />} />
+        <NotificationRow icon={Clock} iconBg="rgba(97,175,239,0.1)" iconColor="#61afef" title="เตือนให้พัก" desc="เตือนให้พักหลังจากโฟกัสเสร็จ"
+          control={<Toggle enabled={breakReminder} onToggle={() => setBreakReminder(!breakReminder)} />} />
+        <NotificationRow icon={Volume2} iconBg="rgba(229,192,123,0.1)" iconColor="#e5c07b" title="เสียงแจ้งเตือน" desc="เล่นเสียงเมื่อมีการแจ้งเตือน"
+          control={<Toggle enabled={soundAlerts} onToggle={() => setSoundAlerts(!soundAlerts)} />} />
+      </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#e06c75]/10 flex items-center justify-center">
-              <BellOff className="h-5 w-5 text-[#e06c75]" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-[#1a1d23] leading-relaxed">ห้ามรบกวน</p>
-              <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">ปิดเสียงแจ้งเตือนทั้งหมดขณะโฟกัส</p>
-            </div>
-          </div>
-          <Toggle enabled={doNotDisturb} onToggle={() => setDoNotDisturb(!doNotDisturb)} />
-        </div>
+      <div className="my-6 h-px" style={{ backgroundColor: 'var(--border)' }} />
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#eef0f5] flex items-center justify-center">
-              <Bell className="h-5 w-5 text-[#6b7280]" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-[#1a1d23] leading-relaxed">เตือนก่อนเวลา</p>
-              <p className="text-sm text-[#6b7280] mt-0.5 leading-relaxed">แจ้งเตือนก่อนรอบเวลาที่กำหนด</p>
-            </div>
-          </div>
-          <select
-            value={reminderBefore}
-            onChange={(e) => setReminderBefore(e.target.value)}
-            className="rounded-lg border border-[#e1e4ec] bg-[#f5f6fa] px-3 py-2 text-base text-[#1a1d23] outline-none focus:border-[#61afef] focus:ring-2 focus:ring-[#61afef]/20 transition cursor-pointer leading-relaxed"
-          >
-            <option value="none">ไม่เตือน</option>
-            <option value="5">5 นาที</option>
-            <option value="10">10 นาที</option>
-            <option value="15">15 นาที</option>
-          </select>
-        </div>
+      <h3 className="text-base font-semibold uppercase tracking-wider mb-3 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>สรุปผลและกำหนดการ</h3>
+      <div className="space-y-5">
+        <NotificationRow icon={MessageSquare} iconBg="rgba(198,120,221,0.1)" iconColor="#c678dd" title="สรุปผลรายวัน" desc="รับสรุปสถิติการโฟกัสในแต่ละวัน"
+          control={<Toggle enabled={dailySummary} onToggle={() => setDailySummary(!dailySummary)} />} />
+        <NotificationRow icon={BellOff} iconBg="rgba(224,108,117,0.1)" iconColor="#e06c75" title="ห้ามรบกวน" desc="ปิดเสียงแจ้งเตือนทั้งหมดขณะโฟกัส"
+          control={<Toggle enabled={doNotDisturb} onToggle={() => setDoNotDisturb(!doNotDisturb)} />} />
+        <NotificationRow icon={Bell} iconBg="var(--bg-tertiary)" iconColor="var(--text-secondary)" title="เตือนก่อนเวลา" desc="แจ้งเตือนก่อนรอบเวลาที่กำหนด"
+          control={
+            <select value={reminderBefore} onChange={(e) => setReminderBefore(e.target.value)}
+              className="rounded-lg px-3 py-2 text-base outline-none transition cursor-pointer leading-relaxed"
+              style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+              <option value="none">ไม่เตือน</option>
+              <option value="5">5 นาที</option>
+              <option value="10">10 นาที</option>
+              <option value="15">15 นาที</option>
+            </select>
+          } />
       </div>
 
       <div className="mt-8 flex justify-end">
-        <button
-          type="button"
-          onClick={() => console.log('Notification settings saved')}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#61afef] px-5 py-2.5 text-base font-semibold text-white transition hover:bg-[#4d9fd9] active:scale-[0.98] cursor-pointer leading-relaxed"
-        >
-          <Save className="h-5 w-5" />
-          บันทึกการเปลี่ยนแปลง
+        <button type="button" onClick={() => console.log('Notification settings saved')}
+          className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-base font-semibold text-white transition active:scale-[0.98] cursor-pointer leading-relaxed shadow-md hover:-translate-y-0.5"
+          style={{ backgroundColor: 'var(--accent)' }}>
+          <Save className="h-5 w-5" /> บันทึกการเปลี่ยนแปลง
         </button>
       </div>
     </>
@@ -238,13 +131,13 @@ function NotificationsContent({
 
 export default function SettingPage() {
   const [activeMenu, setActiveMenu] = useState('timer');
+  const { isDark, toggleTheme } = useTheme();
 
   const [focusDuration, setFocusDuration] = useState(25);
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
   const [autoStart, setAutoStart] = useState(true);
   const [sounds, setSounds] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   const [sessionReminder, setSessionReminder] = useState(true);
   const [breakReminder, setBreakReminder] = useState(true);
@@ -254,26 +147,22 @@ export default function SettingPage() {
   const [reminderBefore, setReminderBefore] = useState('5');
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-[#1a1d23] mb-6 leading-relaxed">ตั้งค่า</h1>
+    <div className="p-6 max-w-5xl mx-auto" style={{ minHeight: 'calc(100vh - 73px)' }}>
+      <h1 className="text-3xl font-bold mb-6 leading-relaxed" style={{ color: 'var(--text-primary)' }}>ตั้งค่า</h1>
 
       <div className="flex gap-6">
-        {/* ── Left Sidebar ── */}
         <aside className="w-60 shrink-0">
-          <nav className="bg-white rounded-xl border border-[#e1e4ec] p-2 space-y-0.5 shadow-sm">
+          <nav className="rounded-xl p-2 space-y-0.5" style={{ backgroundColor: 'var(--bg-secondary)', boxShadow: 'var(--shadow-card)' }}>
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeMenu === item.key;
               return (
-                <button
-                  key={item.key}
-                  onClick={() => setActiveMenu(item.key)}
-                  className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition cursor-pointer leading-relaxed ${
-                    isActive
-                      ? 'bg-[#eef0f5] text-[#61afef]'
-                      : 'text-[#6b7280] hover:bg-[#f5f6fa] hover:text-[#1a1d23]'
-                  }`}
-                >
+                <button key={item.key} onClick={() => setActiveMenu(item.key)}
+                  className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition cursor-pointer leading-relaxed"
+                  style={{
+                    backgroundColor: isActive ? 'var(--bg-tertiary)' : 'transparent',
+                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                  }}>
                   <Icon className="h-5 w-5" />
                   {item.label}
                 </button>
@@ -282,8 +171,7 @@ export default function SettingPage() {
           </nav>
         </aside>
 
-        {/* ── Right Content ── */}
-        <div className="flex-1 bg-white rounded-xl border border-[#e1e4ec] p-6 shadow-sm">
+        <div className="flex-1 rounded-xl p-6" style={{ backgroundColor: 'var(--bg-secondary)', boxShadow: 'var(--shadow-card)' }}>
           {activeMenu === 'timer' ? (
             <TimerContent
               focusDuration={focusDuration} setFocusDuration={setFocusDuration}
@@ -291,7 +179,7 @@ export default function SettingPage() {
               longBreak={longBreak} setLongBreak={setLongBreak}
               autoStart={autoStart} setAutoStart={setAutoStart}
               sounds={sounds} setSounds={setSounds}
-              darkMode={darkMode} setDarkMode={setDarkMode}
+              isDark={isDark} toggleTheme={toggleTheme}
             />
           ) : (
             <NotificationsContent

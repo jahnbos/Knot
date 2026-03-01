@@ -15,36 +15,36 @@ export default function LoginPage({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4 relative overflow-hidden transition-colors duration-500">
 
       {/* ── Decorative gradient orbs ── */}
       {/* Top Left Glow */}
-      <div className="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] rounded-full bg-[#6366f1]/30 blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] rounded-full bg-[var(--accent)]/10 blur-[120px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
       {/* Bottom Right Glow */}
-      <div className="absolute -bottom-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-[#06b6d4]/20 blur-[130px] pointer-events-none mix-blend-screen" />
+      <div className="absolute -bottom-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-[var(--accent-purple)]/10 blur-[130px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
       {/* Center Behind Card Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#c084fc]/15 blur-[150px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[var(--accent-gold)]/10 blur-[150px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
 
       {/* ── Card ── */}
       <div className="w-full max-w-md relative z-10">
 
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-10">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#06b6d4] flex items-center justify-center shadow-lg shadow-[#6366f1]/25">
+          <div className="h-12 w-12 rounded-2xl bg-[var(--accent)] flex items-center justify-center shadow-lg" style={{ boxShadow: '0 10px 15px -3px rgba(184, 91, 62, 0.25)' }}>
             <Link className="h-6 w-6 text-white" />
           </div>
-          <span className="text-4xl font-bold text-white tracking-tight">Knot</span>
+          <span className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">Knot</span>
         </div>
 
         {/* Glassmorphism Card */}
-        <div className="bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-3xl p-8 shadow-2xl shadow-black/20">
+        <div className="bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] rounded-3xl p-8 shadow-2xl">
 
           {/* Welcome Text */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white leading-relaxed">
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] leading-relaxed">
               {isLogin ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่'}
             </h1>
-            <p className="text-sm text-white/50 mt-1 leading-relaxed">
+            <p className="text-sm text-[var(--text-secondary)] mt-1 leading-relaxed">
               {isLogin ? 'เข้าสู่ระบบเพื่อจัดการงานของคุณ' : 'เริ่มต้นจัดการเวลาและงานของคุณวันนี้'}
             </p>
           </div>
@@ -53,7 +53,7 @@ export default function LoginPage({ onLogin }) {
           <button
             type="button"
             onClick={() => onLogin && onLogin()}
-            className="w-full flex items-center justify-center gap-3 rounded-xl bg-white/[0.08] border border-white/[0.1] px-4 py-3.5 text-sm font-medium text-white/90 transition-all duration-300 hover:bg-white/[0.14] hover:border-white/[0.2] hover:shadow-lg hover:shadow-white/[0.03] active:scale-[0.98] cursor-pointer group"
+            className="w-full flex items-center justify-center gap-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] px-4 py-3.5 text-sm font-medium text-[var(--text-primary)] transition-all duration-300 hover:bg-[var(--bg-hover)] hover:border-[var(--border-light)] hover:shadow-card active:scale-[0.98] cursor-pointer group"
           >
             <svg className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -66,9 +66,9 @@ export default function LoginPage({ onLogin }) {
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-7">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            <span className="text-xs text-white/30 uppercase tracking-widest font-medium">หรือ</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
+            <span className="text-xs text-[var(--text-muted)] uppercase tracking-widest font-medium">หรือ</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
           </div>
 
           {/* Form */}
@@ -78,14 +78,14 @@ export default function LoginPage({ onLogin }) {
               <div className="flex gap-4 animate-in slide-in-from-top-2 duration-300">
                 {/* First Name */}
                 <div className="relative group w-1/2">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 transition-colors group-focus-within:text-[#6366f1]" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--accent)]" />
                   <input
                     id="firstName"
                     type="text"
                     placeholder="ชื่อ"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] py-3.5 pl-11 pr-4 text-sm text-white placeholder-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#6366f1]/50 focus:ring-2 focus:ring-[#6366f1]/20 leading-relaxed"
+                    className="w-full rounded-xl bg-[var(--bg-input)] border border-[var(--border)] py-3.5 pl-11 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all duration-300 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 leading-relaxed"
                   />
                 </div>
                 {/* Last Name */}
@@ -96,7 +96,7 @@ export default function LoginPage({ onLogin }) {
                     placeholder="นามสกุล"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] py-3.5 px-4 text-sm text-white placeholder-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#6366f1]/50 focus:ring-2 focus:ring-[#6366f1]/20 leading-relaxed"
+                    className="w-full rounded-xl bg-[var(--bg-input)] border border-[var(--border)] py-3.5 px-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all duration-300 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 leading-relaxed"
                   />
                 </div>
               </div>
@@ -104,32 +104,32 @@ export default function LoginPage({ onLogin }) {
 
             {/* Email */}
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 transition-colors group-focus-within:text-[#6366f1]" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--accent)]" />
               <input
                 id="email"
                 type="email"
                 placeholder="อีเมล"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] py-3.5 pl-11 pr-4 text-sm text-white placeholder-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#6366f1]/50 focus:ring-2 focus:ring-[#6366f1]/20 leading-relaxed"
+                className="w-full rounded-xl bg-[var(--bg-input)] border border-[var(--border)] py-3.5 pl-11 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all duration-300 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 leading-relaxed"
               />
             </div>
 
             {/* Password */}
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 transition-colors group-focus-within:text-[#6366f1]" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--accent)]" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="รหัสผ่าน"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] py-3.5 pl-11 pr-12 text-sm text-white placeholder-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#6366f1]/50 focus:ring-2 focus:ring-[#6366f1]/20 leading-relaxed"
+                className="w-full rounded-xl bg-[var(--bg-input)] border border-[var(--border)] py-3.5 pl-11 pr-12 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-all duration-300 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 leading-relaxed"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -138,7 +138,7 @@ export default function LoginPage({ onLogin }) {
             {/* Forgot Password (Only for Login) */}
             {isLogin && (
               <div className="text-right pb-2">
-                <a href="#" className="text-xs text-white/40 hover:text-[#6366f1] transition leading-relaxed">
+                <a href="#" className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] transition leading-relaxed">
                   ลืมรหัสผ่าน?
                 </a>
               </div>
@@ -147,7 +147,7 @@ export default function LoginPage({ onLogin }) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full rounded-xl bg-gradient-to-r from-[#6366f1] to-[#818cf8] py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#6366f1]/30 hover:brightness-110 active:scale-[0.98] cursor-pointer mt-2"
+              className="w-full rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] py-3.5 text-sm font-semibold text-[var(--bg-secondary)] transition-all duration-300 hover:shadow-lg hover:brightness-110 active:scale-[0.98] cursor-pointer mt-2"
             >
               {isLogin ? 'เข้าสู่ระบบ' : 'สร้างบัญชี'}
             </button>
@@ -155,12 +155,12 @@ export default function LoginPage({ onLogin }) {
         </div>
 
         {/* Bottom Text Toggle */}
-        <p className="text-center text-sm text-white/40 mt-8 leading-relaxed">
+        <p className="text-center text-sm text-[var(--text-secondary)] mt-8 leading-relaxed">
           {isLogin ? 'ยังไม่มีบัญชี?' : 'มีบัญชีอยู่แล้ว?'}
           {' '}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-[#818cf8] font-medium hover:text-[#a5b4fc] transition hover:underline cursor-pointer"
+            className="text-[var(--accent)] font-medium hover:text-[var(--accent-hover)] transition hover:underline cursor-pointer"
           >
             {isLogin ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'}
           </button>

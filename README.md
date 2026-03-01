@@ -1,18 +1,56 @@
-# React + Vite
+# Knot 🪢
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Knot เป็นหน้าเว็บแอปพลิเคชัน (Web Application) ที่เน้นด้านการจัดการแอป โพรดักทิวิตี้ (Productivity) และแดชบอร์ดติดตามงาน โดยให้ความสำคัญกับการออกแบบ UX/UI ที่ทันสมัย สวยงาม และประสบการณ์การใช้งานที่ดีเยี่ยม
 
-Currently, two official plugins are available:
+## 🌟 ฟีเจอร์หลัก (Key Features)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dashboard & Reports:** หน้าแสดงผลภาพรวมและรายงานที่มีทั้งแผนภูมิแท่ง (Bar Chart) แสดงงานที่วางแผน/เสร็จสิ้น, แผนภูมิเส้น (Line Chart) และการออกแบบ KPI Cards ที่อ่านง่าย
+- **Theming:** รองรับการเปลี่ยนธีมทั้ง Light Mode, Dark Mode และ Sepia Theme
+- **Localization:** รองรับการใช้งานแบบหลายภาษา รวมถึงปรับแต่ง Typography ให้เหมาะสมกับภาษาไทย
+- **Modern UI Components:** ไอคอนสวยงามจาก Lucide React และจัดสไตล์ UI อย่างมีประสิทธิภาพด้วย Tailwind CSS
 
-## React Compiler
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- **Core:** [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **Code Quality:** ESLint
 
-Note: This will impact Vite dev & build performances.
+---
 
-## Expanding the ESLint configuration
+## 🚀 วิธีติดตั้งและรันโปรเจค (How to Run)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+ระบบนี้ใช้ Node.js และแพ็กเกจเมเนเจอร์อย่าง `npm` (หรือตัวอื่น ๆ เช่น `yarn`, `pnpm` ก็สามารถใช้ได้เช่นกัน)
+
+### 1. ติดตั้ง Dependencies
+
+เปิด Terminal ในโฟลเดอร์โปรเจคและรันคำสั่งเพื่อโหลดไลบรารีทั้งหมดที่จำเป็น:
+
+```bash
+npm install
+```
+
+### 2. รันหน้าเว็บ (Development Mode)
+
+ใช้คำสั่งนี้เพื่อเปิดลีดเซิร์ฟเวอร์จำลองสำหรับการพัฒนา:
+
+```bash
+npm run dev
+```
+
+> **หมายเหตุ:** หลังจากรันคำสั่ง ระบบจะแสดง URL (เช่น `http://localhost:5173/`) ให้คลิกหรือนำไปเปิดใน Web Browser ได้เลย
+
+### 3. คำสั่งอื่นๆ ที่มีประโยชน์
+
+- **Build ระบบ:** นำโค้ดโปรดักชันไปใช้งานจริง
+  ```bash
+  npm run build
+  ```
+- **Preview ระบบที่ Build แล้ว:** ใช้ดูตัวอย่างผลลัพธ์ของเวอร์ชันจริง
+  ```bash
+  npm run preview
+  ```
+- **ตรวจสอบ Syntax ของ Code:**
+  ```bash
+  npm run lint
+  ```

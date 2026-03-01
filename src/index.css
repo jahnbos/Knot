@@ -1,5 +1,76 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Prompt", "Inter", -apple-system, sans-serif;
+  --font-sans: "Inter", "Prompt", -apple-system, sans-serif;
+}
+
+/* ── Light Theme (Default) ── */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e2e8f0;
+  --bg-hover: #f1f5f9;
+  --bg-input: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --accent: #0f766e;
+  --accent-hover: #115e59;
+  --accent-purple: #6366f1;
+  --accent-coral: #ef4444;
+  --accent-green: #10b981;
+  --accent-gold: #f59e0b;
+  --shadow-card: 0 4px 24px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 20px 60px -15px rgba(15, 23, 42, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --gradient-top: rgba(15, 118, 110, 0.05);
+}
+
+/* ── Dark Theme ── */
+:root.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-hover: #212c3d;
+  --bg-input: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --border-light: #1e293b;
+  --accent: #14b8a6;
+  --accent-hover: #2dd4bf;
+  --accent-purple: #818cf8;
+  --accent-coral: #f87171;
+  --accent-green: #34d399;
+  --accent-gold: #fbbf24;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 60px -15px rgba(0, 0, 0, 0.6);
+  --glass-bg: rgba(30, 41, 59, 0.85);
+  --glass-border: rgba(20, 184, 166, 0.08);
+  --gradient-top: rgba(20, 184, 166, 0.06);
+}
+
+/* ── Smooth Theme Transition ── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* ── Scrollbar for Dark Mode ── */
+:root.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+:root.dark ::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+:root.dark ::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 9999px;
 }
