@@ -4,12 +4,22 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useTasks } from '../contexts/TaskContext'; 
 import AddTaskModal from '../components/AddTaskModal';
 
-// ปรับให้ตรงกับวันที่ปัจจุบัน (1 มีนาคม 2026)
-const TODAY_DATE = 1; 
-const CURRENT_MONTH_YEAR = "2026-03"; 
 const DAY_HEADERS = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
-const getDateString = (day) => `${CURRENT_MONTH_YEAR}-${String(day).padStart(2, '0')}`;
+const getLocalDateInfo = (date = new Date()) => {
+  return {
+    year: date.getFullYear(),
+    month: String(date.getMonth() + 1).padStart(2, '0'),
+    date: date.getDate(),
+    dayOfWeek: date.getDay(),
+    d: date
+  };
+};
+
+const TODAY = getLocalDateInfo();
+const TODAY_FULL_DATEStr = `${TODAY.year}-${TODAY.month}-${String(TODAY.date).padStart(2, '0')}`;
+
+const getDateString = (year, month, day) => `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
 function WeekTaskCard({ task }) {
   const isDone = task.done || task.status === 'completed';
@@ -35,8 +45,8 @@ function WeekTaskCard({ task }) {
 }
 
 function WeekColumn({ day, tasks }) {
-  const isToday = day.date === TODAY_DATE;
-  const dateStr = getDateString(day.date);
+  const dateStr = day.fullDateStr;
+  const isToday = dateStr === TODAY_FULL_DATEStr;
   const dayTasks = tasks.filter(t => t.date === dateStr);
 
   return (
@@ -78,11 +88,16 @@ function WeekColumn({ day, tasks }) {
   );
 }
 
-function MonthView({ tasks }) {
-  // ปรับเป็น 31 วันสำหรับเดือนมีนาคม
-  const monthCells = useMemo(() => [
-    ...Array.from({ length: 31 }, (_, i) => ({ date: i + 1, current: true })),
-  ], []);
+function MonthView({ tasks, currentDate }) {
+  const { year: currentYear, month: currentMonth } = getLocalDateInfo(currentDate);
+
+  const monthCells = useMemo(() => {
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const firstDay = new Date(currentYear, parseInt(currentMonth) - 1, 1).getDay();
+    const padding = Array.from({ length: firstDay }, () => ({ date: null, current: false }));
+    const currentDays = Array.from({ length: daysInMonth }, (_, i) => ({ date: i + 1, current: true }));
+    return [...padding, ...currentDays];
+  }, [currentYear, currentMonth]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 pb-12">
@@ -95,14 +110,26 @@ function MonthView({ tasks }) {
         </div>
         <div className="grid grid-cols-7 auto-rows-[minmax(140px,_1fr)]">
           {monthCells.map((cell, idx) => {
-            const dateStr = getDateString(cell.date);
-            const isToday = cell.current && cell.date === TODAY_DATE;
             const isLastCol = (idx + 1) % 7 === 0;
-            const isLastRow = idx >= 28;
-            const dayTasks = cell.current ? tasks.filter(t => t.date === dateStr) : [];
+            const isLastRow = idx >= monthCells.length - 7;
+
+            if (!cell.current) {
+              return (
+                <div key={`pad-${idx}`} className="p-3 transition-colors"
+                  style={{
+                    borderRight: isLastCol ? 'none' : '1px solid var(--border-light)',
+                    borderBottom: isLastRow ? 'none' : '1px solid var(--border-light)',
+                  }}>
+                </div>
+              );
+            }
+
+            const dateStr = getDateString(currentYear, currentMonth, cell.date);
+            const isToday = dateStr === TODAY_FULL_DATEStr;
+            const dayTasks = tasks.filter(t => t.date === dateStr);
 
             return (
-              <div key={idx} className="p-3 flex flex-col gap-1 transition-colors hover:bg-[var(--bg-hover)]"
+              <div key={`day-${cell.date}`} className="p-3 flex flex-col gap-1 transition-colors hover:bg-[var(--bg-hover)]"
                 style={{
                   borderRight: isLastCol ? 'none' : '1px solid var(--border-light)',
                   borderBottom: isLastRow ? 'none' : '1px solid var(--border-light)',
@@ -133,14 +160,44 @@ function MonthView({ tasks }) {
 export default function SchedulePage() {
   const [view, setView] = useState('Month');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const { tasks } = useTasks(); 
 
-  // ปรับวันที่ในสัปดาห์ปัจจุบัน (มีนาคม)
-  const weekDays = [
-    { short: 'อา.', date: 1 }, { short: 'จ.', date: 2 }, { short: 'อ.', date: 3 },
-    { short: 'พ.', date: 4 }, { short: 'พฤ.', date: 5 }, { short: 'ศ.', date: 6 },
-    { short: 'ส.', date: 7 },
-  ];
+  const weekDays = useMemo(() => {
+    const { d, dayOfWeek } = getLocalDateInfo(currentDate);
+    const startOfWeek = new Date(d);
+    startOfWeek.setDate(d.getDate() - dayOfWeek);
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const dayDate = new Date(startOfWeek);
+      dayDate.setDate(startOfWeek.getDate() + i);
+      const shorts = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+      const fullDateStr = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
+      return { short: shorts[i], date: dayDate.getDate(), fullDateStr };
+    });
+  }, [currentDate]);
+
+  const handlePrev = () => {
+    const newDate = new Date(currentDate);
+    if (view === 'Month') {
+      newDate.setMonth(newDate.getMonth() - 1);
+    } else {
+      newDate.setDate(newDate.getDate() - 7);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const handleNext = () => {
+    const newDate = new Date(currentDate);
+    if (view === 'Month') {
+      newDate.setMonth(newDate.getMonth() + 1);
+    } else {
+      newDate.setDate(newDate.getDate() + 7);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const handleToday = () => setCurrentDate(new Date());
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -149,7 +206,16 @@ export default function SchedulePage() {
       <div className="max-w-7xl mx-auto px-6 py-10 flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-black tracking-tight leading-none mb-2" style={{ color: 'var(--text-primary)' }}>ตารางเวลา</h1>
-          <p className="text-lg font-medium opacity-60" style={{ color: 'var(--text-secondary)' }}>มีนาคม 2026</p>
+          <div className="flex items-center gap-4 mt-4">
+            <p className="text-xl font-bold" style={{ color: 'var(--text-secondary)' }}>
+              {new Intl.DateTimeFormat('th-TH', { month: 'long', year: 'numeric' }).format(currentDate)}
+            </p>
+            <div className="flex items-center gap-1 bg-[var(--bg-tertiary)] p-1 rounded-xl border" style={{ borderColor: 'var(--border)' }}>
+              <button onClick={handlePrev} className="p-1 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] transition-colors"><ChevronLeft size={20} /></button>
+              <button onClick={handleToday} className="px-3 py-1 text-sm font-bold text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-colors">วันนี้</button>
+              <button onClick={handleNext} className="p-1 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] transition-colors"><ChevronRight size={20} /></button>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -170,9 +236,9 @@ export default function SchedulePage() {
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        {view === 'Month' ? <MonthView tasks={tasks} /> : (
+        {view === 'Month' ? <MonthView tasks={tasks} currentDate={currentDate} /> : (
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-7 gap-4 pb-12">
-            {weekDays.map((day) => <WeekColumn key={day.date} day={day} tasks={tasks} />)}
+            {weekDays.map((day) => <WeekColumn key={day.fullDateStr} day={day} tasks={tasks} />)}
           </div>
         )}
       </div>
