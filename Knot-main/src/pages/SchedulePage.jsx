@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Clock, Home } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useTasks } from '../contexts/TaskContext'; 
-import AddTaskModal from '../components/AddTaskModal';
+import { useTasks } from '../contexts/TaskContext';
 
 const DAY_HEADERS = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
@@ -21,23 +20,38 @@ const TODAY_FULL_DATEStr = `${TODAY.year}-${TODAY.month}-${String(TODAY.date).pa
 
 const getDateString = (year, month, day) => `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+// ── Priority color map ──────────────────────────────────────────
+const PRIORITY_STYLES = {
+  high:   { color: '#ef4444', bg: 'rgba(239, 68,  68,  0.12)', label: 'สำคัญ'  },
+  medium: { color: '#f59e0b', bg: 'rgba(245, 158, 11,  0.12)', label: 'ปกติ'   },
+  low:    { color: '#0d9488', bg: 'rgba(20,  184, 166, 0.18)', label: 'ไม่รีบ' },
+};
+const getPriority = (p) => PRIORITY_STYLES[p] ?? PRIORITY_STYLES.low;
+
 function WeekTaskCard({ task }) {
   const isDone = task.done || task.status === 'completed';
+  const { color: priorityColor, bg: priorityBg, label: priorityLabel } = getPriority(task.priority);
+
   return (
-    <div className={`rounded-xl p-3 border flex flex-col gap-1 transition-all shadow-sm 
+    <div className={`rounded-xl p-3 border-l-4 flex flex-col gap-1 transition-all shadow-sm 
       ${isDone ? 'opacity-40 grayscale' : 'hover:shadow-md'}`}
-      style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
-      <span className="flex items-center gap-1 text-sm font-medium leading-relaxed" style={{ color: 'var(--accent)' }}>
-        <Clock className="w-3.5 h-3.5" /> {task.time || '--:--'}
-      </span>
+      style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', borderLeftColor: priorityColor }}>
+      <div className="flex items-center justify-between gap-1">
+        <span className="flex items-center gap-1 text-sm font-medium leading-relaxed" style={{ color: priorityColor }}>
+          <Clock className="w-3.5 h-3.5" /> {task.time || '--:--'}
+        </span>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: priorityBg, color: priorityColor }}>
+          {priorityLabel}
+        </span>
+      </div>
       <span className={`text-base font-bold leading-relaxed ${isDone ? 'line-through' : ''}`} 
             style={{ color: 'var(--text-primary)' }}>
         {task.title}
       </span>
-      {task.tags?.length > 0 && (
+      {task.task && (
         <span className="text-xs uppercase font-semibold tracking-wider opacity-60" 
               style={{ color: 'var(--text-secondary)' }}>
-          {task.tags[0]}
+          {task.task}
         </span>
       )}
     </div>
@@ -78,7 +92,7 @@ function WeekColumn({ day, tasks }) {
             {dayTasks.map((t) => <WeekTaskCard key={t.id} task={t} />)}
             <button className="mt-auto w-full py-2 rounded-xl text-xs font-bold transition-all border border-dashed opacity-50 hover:opacity-100 cursor-pointer"
               style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-              onClick={() => window.dispatchEvent(new CustomEvent('open-add-task-modal'))}>
+              onClick={() => window.dispatchEvent(new CustomEvent('open-global-add-task', { detail: { isDetailed: true } }))}>
               + เพิ่มงาน
             </button>
           </>
@@ -140,13 +154,16 @@ function MonthView({ tasks, currentDate }) {
                     color: isToday ? '#fff' : 'var(--text-primary)',
                   }}>{cell.date}</span>
                 
-                <div className="flex flex-col gap-1">
-                  {dayTasks.map(t => (
-                    <div key={t.id} className="text-[10px] font-bold px-2 py-1.5 rounded-lg truncate border transition-all"
-                         style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)', borderColor: 'var(--accent-border)', backgroundOpacity: 0.1 }}>
-                      {t.done ? '✓ ' : ''}{t.title}
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-1 overflow-y-auto max-h-[80px] no-scrollbar">
+                  {dayTasks.map(t => {
+                    const { color, bg } = getPriority(t.priority);
+                    return (
+                      <div key={t.id} className="text-[10px] sm:text-xs font-bold px-2 py-1.5 rounded-lg truncate transition-all flex items-center gap-1"
+                           style={{ backgroundColor: bg, color }}>
+                        {t.done ? '✓ ' : ''}{t.title}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -159,7 +176,6 @@ function MonthView({ tasks, currentDate }) {
 
 export default function SchedulePage() {
   const [view, setView] = useState('Month');
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const { tasks } = useTasks(); 
 
@@ -201,36 +217,41 @@ export default function SchedulePage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      {typeof window !== 'undefined' && window.addEventListener('open-add-task-modal', () => setIsModalOpen(true), { once: true })}
       
-      <div className="max-w-7xl mx-auto px-6 py-10 flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight leading-none mb-2" style={{ color: 'var(--text-primary)' }}>ตารางเวลา</h1>
-          <div className="flex items-center gap-4 mt-4">
-            <p className="text-xl font-bold" style={{ color: 'var(--text-secondary)' }}>
+      <div className="max-w-7xl mx-auto px-6 py-4 md:py-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4 md:mb-0">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row md:flex-col justify-between items-start sm:items-center md:items-start gap-4 sm:gap-0 md:gap-4">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight leading-none" style={{ color: 'var(--text-primary)' }}>ตารางเวลา</h1>
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full sm:w-auto">
+            <p className="text-lg md:text-xl font-bold whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
               {new Intl.DateTimeFormat('th-TH', { month: 'long', year: 'numeric' }).format(currentDate)}
             </p>
-            <div className="flex items-center gap-1 bg-[var(--bg-tertiary)] p-1 rounded-xl border" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-1 bg-[var(--bg-tertiary)] p-1 rounded-xl border shrink-0" style={{ borderColor: 'var(--border)' }}>
               <button onClick={handlePrev} className="p-1 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] transition-colors"><ChevronLeft size={20} /></button>
-              <button onClick={handleToday} className="px-3 py-1 text-sm font-bold text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-colors">วันนี้</button>
               <button onClick={handleNext} className="p-1 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] transition-colors"><ChevronRight size={20} /></button>
             </div>
+            {/* Divider */}
+            <div className="hidden sm:block w-px h-6 bg-[var(--border)]" />
+            <button onClick={handleToday} className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 text-sm font-bold rounded-xl border transition-all hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap"
+              style={{ color: 'var(--accent)', borderColor: 'var(--accent)', backgroundColor: 'transparent' }}>
+              <Home size={14} />
+              กลับวันนี้
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex p-1 rounded-2xl bg-[var(--bg-tertiary)] shadow-inner border" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-3 md:gap-4">
+          <div className="flex p-1 rounded-2xl bg-[var(--bg-tertiary)] shadow-inner border shrink-0 max-w-[fit-content]" style={{ borderColor: 'var(--border)' }}>
             {['Month', 'Week'].map((v) => (
               <button key={v} onClick={() => setView(v)}
-                className={`px-6 py-2 text-sm font-bold rounded-xl transition-all ${view === v ? 'bg-[var(--bg-secondary)] text-[var(--accent)] shadow-md' : 'text-[var(--text-secondary)]'}`}>
+                className={`px-4 md:px-6 py-2 text-sm font-bold rounded-xl transition-all duration-300 ease-in-out whitespace-nowrap cursor-pointer ${view === v ? 'bg-[var(--bg-secondary)] text-[var(--accent)] shadow-md scale-105' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] scale-100'}`}>
                 {v === 'Month' ? 'เดือน' : 'สัปดาห์'}
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-2 text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          <button className="flex items-center justify-center gap-2 text-white px-4 md:px-8 py-3 rounded-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
             style={{ backgroundColor: 'var(--accent)' }}
-            onClick={() => setIsModalOpen(true)}>
-            <Plus className="w-5 h-5" strokeWidth={3} /> เพิ่มงานใหม่
+            onClick={() => window.dispatchEvent(new CustomEvent('open-global-add-task', { detail: { isDetailed: true } }))}>
+            <Plus className="w-5 h-5 shrink-0" strokeWidth={3} /> <span className="hidden sm:inline">เพิ่มงานใหม่</span><span className="sm:hidden">เพิ่มงาน</span>
           </button>
         </div>
       </div>
@@ -243,7 +264,6 @@ export default function SchedulePage() {
         )}
       </div>
 
-      <AddTaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

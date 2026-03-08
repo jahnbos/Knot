@@ -4,18 +4,29 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const CYCLE = ['focus', 'short', 'focus', 'short', 'focus', 'short', 'focus', 'long'];
 
-const MODE_CONFIG = {
-  focus:  { label: 'โฟกัส',   seconds: 25 * 60 },
-  short:  { label: 'พักสั้น', seconds:  5 * 60 },
-  long:   { label: 'พักยาว', seconds: 15 * 60 },
-};
-
 const TABS = ['focus', 'short', 'long'];
 
 export default function PomodoroPage() {
+  const [config, setConfig] = useState(() => {
+    try {
+      const savedSettings = JSON.parse(localStorage.getItem('pomodoroSettings') || '{}');
+      return {
+        focus:  { label: 'โฟกัส',   seconds: (savedSettings.focus || 25) * 60 },
+        short:  { label: 'พักสั้น', seconds:  (savedSettings.short || 5) * 60 },
+        long:   { label: 'พักยาว', seconds: (savedSettings.long || 15) * 60 },
+      };
+    } catch (e) {
+      return {
+        focus:  { label: 'โฟกัส',   seconds: 25 * 60 },
+        short:  { label: 'พักสั้น', seconds:  5 * 60 },
+        long:   { label: 'พักยาว', seconds: 15 * 60 },
+      };
+    }
+  });
+
   const [cycleIndex, setCycleIndex] = useState(0);
   const [mode, setMode] = useState(CYCLE[0]);
-  const [totalSeconds, setTotalSeconds] = useState(MODE_CONFIG[CYCLE[0]].seconds);
+  const [totalSeconds, setTotalSeconds] = useState(config[CYCLE[0]].seconds);
   const [isRunning, setIsRunning] = useState(false);
   const [completedFocus, setCompletedFocus] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -46,19 +57,19 @@ export default function PomodoroPage() {
     const nextMode = CYCLE[nextIndex];
     setCycleIndex(nextIndex);
     setMode(nextMode);
-    setTotalSeconds(MODE_CONFIG[nextMode].seconds);
+    setTotalSeconds(config[nextMode].seconds);
     setCompletedFocus(getFocusCount(nextIndex));
   }, [cycleIndex, getFocusCount]);
 
   const handleTabClick = useCallback((tab) => {
     setIsRunning(false);
     setMode(tab);
-    setTotalSeconds(MODE_CONFIG[tab].seconds);
+    setTotalSeconds(config[tab].seconds);
   }, []);
 
   const handleReset = useCallback(() => {
     setIsRunning(false);
-    setTotalSeconds(MODE_CONFIG[mode].seconds);
+    setTotalSeconds(config[mode].seconds);
   }, [mode]);
 
   const handleToggle = useCallback(() => setIsRunning((prev) => !prev), []);
@@ -71,6 +82,11 @@ export default function PomodoroPage() {
 
   const timerContent = (
     <div className="flex flex-col items-center justify-center flex-1">
+      {/* Instruction text */}
+      <p className="text-sm font-medium mb-4 tracking-wide" style={{ color: 'var(--text-muted)' }}>
+        เลือกโหมด แล้วกดเริ่ม
+      </p>
+
       {/* Mode Tabs */}
       <div className="rounded-full px-1.5 py-1 flex items-center gap-1 mb-16" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
         {TABS.map((tab) => (
@@ -79,9 +95,10 @@ export default function PomodoroPage() {
             style={{
               backgroundColor: mode === tab ? 'var(--bg-secondary)' : 'transparent',
               color: mode === tab ? 'var(--accent)' : 'var(--text-secondary)',
-              boxShadow: mode === tab ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              boxShadow: mode === tab ? '0 1px 3px rgba(0,0,0,0.1), 0 0 8px rgba(20,184,166,0.15)' : 'none',
+              border: mode === tab ? '1px solid var(--accent)' : '1px solid transparent',
             }}>
-            {MODE_CONFIG[tab].label}
+            {config[tab].label}
           </button>
         ))}
       </div>
@@ -95,23 +112,27 @@ export default function PomodoroPage() {
 
       {/* Controls */}
       <div className="flex items-center gap-6 mb-16">
-        <button onClick={handleReset}
-          className="h-12 w-12 rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer"
-          style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
-          title="รีเซ็ต">
-          <RotateCcw className="h-5 w-5" />
-        </button>
+        <div className="flex flex-col items-center gap-1.5">
+          <button onClick={handleReset}
+            className="h-12 w-12 rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer"
+            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <RotateCcw className="h-5 w-5" />
+          </button>
+          <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>รีเซ็ต</span>
+        </div>
         <button onClick={handleToggle}
           className="h-16 px-10 rounded-full flex items-center justify-center gap-2.5 text-white text-base font-semibold transition active:scale-[0.97] cursor-pointer shadow-lg leading-relaxed"
           style={{ backgroundColor: 'var(--accent)' }}>
           {isRunning ? (<><Pause className="h-5 w-5" /> หยุดชั่วคราว</>) : (<><Play className="h-5 w-5" /> เริ่ม</>)}
         </button>
-        <button onClick={handleSkip}
-          className="h-12 w-12 rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer"
-          style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
-          title="ข้าม">
-          <SkipForward className="h-5 w-5" />
-        </button>
+        <div className="flex flex-col items-center gap-1.5">
+          <button onClick={handleSkip}
+            className="h-12 w-12 rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer"
+            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <SkipForward className="h-5 w-5" />
+          </button>
+          <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>ข้าม</span>
+        </div>
       </div>
 
       {/* Session Progress */}

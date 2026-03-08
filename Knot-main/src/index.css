@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Prompt", -apple-system, sans-serif;
+  --font-sans: "Anuphan", -apple-system, sans-serif;
 }
 
 /* ── Light Theme (Default) ── */
@@ -18,7 +18,7 @@
   --border-light: #f1f5f9;
   --accent: #0f766e;
   --accent-hover: #115e59;
-  --accent-purple: #6366f1;
+  --accent-purple: #7c7cba;
   --accent-coral: #ef4444;
   --accent-green: #10b981;
   --accent-gold: #f59e0b;
@@ -31,25 +31,25 @@
 
 /* ── Dark Theme ── */
 :root.dark {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-hover: #212c3d;
-  --bg-input: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --border: #334155;
-  --border-light: #1e293b;
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2a2a2a;
+  --bg-hover: #252525;
+  --bg-input: #1e1e1e;
+  --text-primary: #f5f5f5;
+  --text-secondary: #b0b0b0;
+  --text-muted: #8a8a8a;
+  --border: #2e2e2e;
+  --border-light: #1e1e1e;
   --accent: #14b8a6;
   --accent-hover: #2dd4bf;
-  --accent-purple: #818cf8;
+  --accent-purple: #a5a5d4;
   --accent-coral: #f87171;
   --accent-green: #34d399;
   --accent-gold: #fbbf24;
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 60px -15px rgba(0, 0, 0, 0.6);
-  --glass-bg: rgba(30, 41, 59, 0.85);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
+  --glass-bg: rgba(30, 30, 30, 0.85);
   --glass-border: rgba(20, 184, 166, 0.08);
   --gradient-top: rgba(20, 184, 166, 0.06);
 }
@@ -63,14 +63,59 @@
   transition-timing-function: ease;
 }
 
-/* ── Scrollbar for Dark Mode ── */
-:root.dark ::-webkit-scrollbar {
+/* ── Consistent Scrollbar ── */
+::-webkit-scrollbar {
   width: 8px;
 }
-:root.dark ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: var(--bg-primary);
 }
-:root.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: var(--bg-tertiary);
   border-radius: 9999px;
+}
+
+/* ── Ambient Glow (all pages, all themes) ── */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+}
+body::before {
+  top: -15%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: var(--accent);
+  opacity: 0.07;
+  filter: blur(120px);
+}
+body::after {
+  bottom: -15%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: var(--accent-purple);
+  opacity: 0.09;
+  filter: blur(130px);
+}
+
+/* Center glow via #root pseudo */
+#root::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  border-radius: 9999px;
+  background: var(--accent-gold);
+  opacity: 0.05;
+  filter: blur(150px);
+  pointer-events: none;
+  z-index: 0;
 }

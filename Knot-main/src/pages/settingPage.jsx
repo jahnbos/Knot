@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Timer, Bell, Save, Volume2, BellRing, BellOff, MessageSquare, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -10,14 +10,14 @@ const menuItems = [
 function Toggle({ enabled, onToggle }) {
   return (
     <button type="button" onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${enabled ? 'bg-[#61afef]' : ''}`}
-      style={{ backgroundColor: enabled ? undefined : 'var(--border)' }}>
-      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ease-in-out cursor-pointer focus:outline-none"
+      style={{ backgroundColor: enabled ? 'var(--accent)' : 'var(--border)' }}>
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
   );
 }
 
-function TimerContent({ focusDuration, setFocusDuration, shortBreak, setShortBreak, longBreak, setLongBreak, autoStart, setAutoStart, sounds, setSounds, isDark, toggleTheme }) {
+function TimerContent({ focusDuration, setFocusDuration, shortBreak, setShortBreak, longBreak, setLongBreak, autoStart, setAutoStart, sounds, setSounds, isDark, toggleTheme, onSave }) {
   const inputCls = "w-full rounded-lg px-3 py-2.5 text-base outline-none transition";
   return (
     <>
@@ -56,7 +56,7 @@ function TimerContent({ focusDuration, setFocusDuration, shortBreak, setShortBre
       </div>
 
       <div className="mt-8 flex justify-end">
-        <button type="button" onClick={() => console.log('Settings saved')}
+        <button type="button" onClick={onSave}
           className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-base font-semibold text-white transition active:scale-[0.98] cursor-pointer leading-relaxed shadow-md hover:-translate-y-0.5"
           style={{ backgroundColor: 'var(--accent)' }}>
           <Save className="h-5 w-5" /> บันทึกการเปลี่ยนแปลง
@@ -83,7 +83,7 @@ function NotificationRow({ icon: Icon, iconBg, iconColor, title, desc, control }
   );
 }
 
-function NotificationsContent({ sessionReminder, setSessionReminder, breakReminder, setBreakReminder, soundAlerts, setSoundAlerts, dailySummary, setDailySummary, doNotDisturb, setDoNotDisturb, reminderBefore, setReminderBefore }) {
+function NotificationsContent({ sessionReminder, setSessionReminder, breakReminder, setBreakReminder, soundAlerts, setSoundAlerts, doNotDisturb, setDoNotDisturb, reminderBefore, setReminderBefore }) {
   return (
     <>
       <h2 className="text-xl font-semibold mb-4 leading-relaxed" style={{ color: 'var(--text-primary)' }}>ตั้งค่าการแจ้งเตือน</h2>
@@ -101,8 +101,6 @@ function NotificationsContent({ sessionReminder, setSessionReminder, breakRemind
 
       <h3 className="text-base font-semibold uppercase tracking-wider mb-3 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>สรุปผลและกำหนดการ</h3>
       <div className="space-y-5">
-        <NotificationRow icon={MessageSquare} iconBg="rgba(198,120,221,0.1)" iconColor="#c678dd" title="สรุปผลรายวัน" desc="รับสรุปสถิติการโฟกัสในแต่ละวัน"
-          control={<Toggle enabled={dailySummary} onToggle={() => setDailySummary(!dailySummary)} />} />
         <NotificationRow icon={BellOff} iconBg="rgba(224,108,117,0.1)" iconColor="#e06c75" title="ห้ามรบกวน" desc="ปิดเสียงแจ้งเตือนทั้งหมดขณะโฟกัส"
           control={<Toggle enabled={doNotDisturb} onToggle={() => setDoNotDisturb(!doNotDisturb)} />} />
         <NotificationRow icon={Bell} iconBg="var(--bg-tertiary)" iconColor="var(--text-secondary)" title="เตือนก่อนเวลา" desc="แจ้งเตือนก่อนรอบเวลาที่กำหนด"
@@ -138,11 +136,37 @@ export default function SettingPage() {
   const [longBreak, setLongBreak] = useState(15);
   const [autoStart, setAutoStart] = useState(true);
   const [sounds, setSounds] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedSettings = JSON.parse(localStorage.getItem('pomodoroSettings') || '{}');
+      if (savedSettings.focus) setFocusDuration(savedSettings.focus);
+      if (savedSettings.short) setShortBreak(savedSettings.short);
+      if (savedSettings.long) setLongBreak(savedSettings.long);
+      if (savedSettings.autoStart !== undefined) setAutoStart(savedSettings.autoStart);
+      if (savedSettings.sounds !== undefined) setSounds(savedSettings.sounds);
+    } catch (e) {
+      console.error('Failed to load pomodoro settings', e);
+    }
+  }, []);
+
+  const handleSaveTimerSettings = () => {
+    localStorage.setItem('pomodoroSettings', JSON.stringify({
+      focus: focusDuration,
+      short: shortBreak,
+      long: longBreak,
+      autoStart,
+      sounds
+    }));
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   const [sessionReminder, setSessionReminder] = useState(true);
   const [breakReminder, setBreakReminder] = useState(true);
   const [soundAlerts, setSoundAlerts] = useState(true);
-  const [dailySummary, setDailySummary] = useState(false);
+
   const [doNotDisturb, setDoNotDisturb] = useState(false);
   const [reminderBefore, setReminderBefore] = useState('5');
 
@@ -180,19 +204,29 @@ export default function SettingPage() {
               autoStart={autoStart} setAutoStart={setAutoStart}
               sounds={sounds} setSounds={setSounds}
               isDark={isDark} toggleTheme={toggleTheme}
+              onSave={handleSaveTimerSettings}
             />
           ) : (
             <NotificationsContent
               sessionReminder={sessionReminder} setSessionReminder={setSessionReminder}
               breakReminder={breakReminder} setBreakReminder={setBreakReminder}
               soundAlerts={soundAlerts} setSoundAlerts={setSoundAlerts}
-              dailySummary={dailySummary} setDailySummary={setDailySummary}
+
               doNotDisturb={doNotDisturb} setDoNotDisturb={setDoNotDisturb}
               reminderBefore={reminderBefore} setReminderBefore={setReminderBefore}
             />
           )}
         </div>
       </div>
+
+      {/* Success Toast Feedback */}
+      {showToast && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 text-white px-6 py-3 rounded-full shadow-2xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-3 z-[100] border"
+          style={{ backgroundColor: 'var(--accent)', borderColor: 'var(--border)' }}>
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="font-bold">บันทึกการตั้งค่าแล้ว!</span>
+        </div>
+      )}
     </div>
   );
 }
