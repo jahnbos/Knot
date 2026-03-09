@@ -21,7 +21,8 @@ import {
   Trash2,
   StickyNote,
   Brain,
-  Send
+  Send,
+  Repeat
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTasks } from '../contexts/TaskContext';
@@ -578,6 +579,12 @@ export default function TodayPage() {
                                'bg-[var(--accent)]'
                             }`} />
                           </div>
+                        )}
+                        {task.recurring && task.recurring !== 'none' && (
+                          <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full"
+                                style={{ backgroundColor: 'var(--accent)/10', color: 'var(--accent)', background: 'rgba(20,184,166,0.12)' }}>
+                            <Repeat size={10} /> {{ daily: 'ทุกวัน', weekly: 'ทุกสัปดาห์', monthly: 'ทุกเดือน' }[task.recurring]}
+                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-sm font-bold opacity-50" style={{ color: 'var(--text-secondary)' }}>

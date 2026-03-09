@@ -110,10 +110,11 @@ export default function AddTaskModal({ isOpen, onClose, initialDetailed = false 
   const [time, setTime] = useState('');
   const [timerDuration, setTimerDuration] = useState('25');
   const [taskCategory, setTaskCategory] = useState('ทั่วไป');
-  const [priority, setPriority] = useState('low'); // Default to 'ไม่รีบ'
+  const [priority, setPriority] = useState('low');
   const [dependencyId, setDependencyId] = useState('');
   const [subtasks, setSubtasks] = useState([{ id: 1, text: '', done: false }]);
   const [isDetailed, setIsDetailed] = useState(initialDetailed);
+  const [recurring, setRecurring] = useState('none');
 
   // Sync isDetailed when modal opens with new props
   useEffect(() => {
@@ -134,7 +135,8 @@ export default function AddTaskModal({ isOpen, onClose, initialDetailed = false 
       priority: isDetailed ? priority : 'low',
       timerDuration: isDetailed ? parseInt(timerDuration) || 25 : 25,
       dependencyId: isDetailed && dependencyId ? parseInt(dependencyId) : null,
-      subtasks: isDetailed ? subtasks.filter(s => s.text.trim() !== '') : []
+      subtasks: isDetailed ? subtasks.filter(s => s.text.trim() !== '') : [],
+      recurring: isDetailed ? recurring : 'none',
     });
     handleClose();
   };
@@ -146,6 +148,7 @@ export default function AddTaskModal({ isOpen, onClose, initialDetailed = false 
     setDependencyId('');
     setSubtasks([{ id: 1, text: '', done: false }]);
     setIsDetailed(initialDetailed);
+    setRecurring('none');
   };
 
   const modalContent = (
@@ -284,6 +287,34 @@ export default function AddTaskModal({ isOpen, onClose, initialDetailed = false 
                 </div>
               </div>
 
+
+              {/* Recurring */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
+                  <Repeat size={14} className="text-[var(--accent)]" /> ทำซ้ำ
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { key: 'none',    label: 'ไม่ทำซ้ำ' },
+                    { key: 'daily',   label: 'ทุกวัน'   },
+                    { key: 'weekly',  label: 'ทุกสัปดาห์' },
+                    { key: 'monthly', label: 'ทุกเดือน' },
+                  ].map((r) => (
+                    <button
+                      key={r.key}
+                      type="button"
+                      onClick={() => setRecurring(r.key)}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border-2 cursor-pointer ${
+                        recurring === r.key
+                          ? 'bg-[var(--accent)] text-white border-transparent shadow-md'
+                          : 'bg-[var(--bg-input)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--accent)]'
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Subtasks */}
               <div className="p-6 rounded-2xl border-2 border-[var(--border)] bg-[var(--bg-secondary)] space-y-4">

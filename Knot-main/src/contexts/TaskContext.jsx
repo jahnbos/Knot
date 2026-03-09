@@ -34,16 +34,25 @@ export function TaskProvider({ children }) {
       title: taskData.title || 'ไม่มีชื่อโครงการ',
       task: taskData.task || 'ทั่วไป',
       time: taskData.time || 'ไม่ระบุเวลา',
-      // ถ้าไม่ได้เลือกวันที่ ให้เป็นวันที่ปัจจุบันเพื่อให้โชว์ใน Today Page ทันที
-      date: taskData.date || today, 
+      date: taskData.date || today,
       priority: taskData.priority || 'medium',
       status: 'todo',
       done: false,
       timerDuration: taskData.timerDuration || 25,
-      subtasks: taskData.subtasks || []
+      subtasks: taskData.subtasks || [],
+      recurring: taskData.recurring || 'none', // 'none' | 'daily' | 'weekly' | 'monthly'
     };
     setTasks((prev) => [...prev, newTask]);
   }, []);
+
+  // คำนวณวันถัดไปตาม recurring
+  const getNextDate = (dateStr, recurring) => {
+    const d = new Date(dateStr);
+    if (recurring === 'daily')   d.setDate(d.getDate() + 1);
+    if (recurring === 'weekly')  d.setDate(d.getDate() + 7);
+    if (recurring === 'monthly') d.setMonth(d.getMonth() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
 
   // ฟังก์ชันสำหรับจดความฟุ้งซ่าน: สำหรับ Persona วอกแวกง่าย
   const addDistraction = useCallback((text) => {
@@ -56,19 +65,33 @@ export function TaskProvider({ children }) {
     setDistractions((prev) => [...prev, newNote]);
   }, []);
 
-  // ฟังก์ชันสลับสถานะงาน (ทำเสร็จ / ยังไม่เสร็จ)
+  // ฟังก์ชันสลับสถานะงาน — ถ้าเป็น recurring จะสร้างงานรอบถัดไปอัตโนมัติ
   const toggleTaskStatus = useCallback((id) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        const isNowDone = !t.done;
-        return { 
-          ...t, 
-          done: isNowDone, 
-          status: isNowDone ? 'completed' : 'todo' 
+    setTasks(prev => {
+      const updated = prev.map(t => {
+        if (t.id === id) {
+          const isNowDone = !t.done;
+          return { ...t, done: isNowDone, status: isNowDone ? 'completed' : 'todo' };
+        }
+        return t;
+      });
+
+      // ถ้าติ๊กเสร็จและมี recurring → สร้างงานรอบถัดไป
+      const task = prev.find(t => t.id === id);
+      if (task && !task.done && task.recurring && task.recurring !== 'none') {
+        const nextDate = getNextDate(task.date, task.recurring);
+        const nextTask = {
+          ...task,
+          id: Date.now() + Math.random(),
+          date: nextDate,
+          done: false,
+          status: 'todo',
         };
+        return [...updated, nextTask];
       }
-      return t;
-    }));
+
+      return updated;
+    });
   }, []);
 
   // ฟังก์ชันลบงาน (ถ้าต้องการ)

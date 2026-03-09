@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Clock, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Clock, Home, Repeat } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTasks } from '../contexts/TaskContext';
 
@@ -19,6 +19,54 @@ const TODAY = getLocalDateInfo();
 const TODAY_FULL_DATEStr = `${TODAY.year}-${TODAY.month}-${String(TODAY.date).padStart(2, '0')}`;
 
 const getDateString = (year, month, day) => `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+// ── Expand recurring tasks ให้ครอบคลุมช่วงวันที่กำหนด ──────────
+function expandRecurringTasks(tasks, rangeStart, rangeEnd) {
+  const expanded = [];
+  const start = new Date(rangeStart);
+  const end = new Date(rangeEnd);
+
+  for (const task of tasks) {
+    if (!task.recurring || task.recurring === 'none') {
+      expanded.push(task);
+      continue;
+    }
+
+    // งานต้นฉบับ
+    expanded.push(task);
+
+    const origin = new Date(task.date);
+    const stepDays = task.recurring === 'daily' ? 1 : task.recurring === 'weekly' ? 7 : null;
+    const stepMonths = task.recurring === 'monthly' ? 1 : null;
+
+    let cursor = new Date(origin);
+
+    // เดินหน้าจาก origin ไปถึง rangeEnd
+    for (let i = 0; i < 366; i++) {
+      if (stepDays) cursor.setDate(cursor.getDate() + stepDays);
+      else if (stepMonths) cursor.setMonth(cursor.getMonth() + stepMonths);
+
+      if (cursor > end) break;
+      if (cursor < start) continue;
+
+      // ไม่ซ้ำกับงานที่ติ๊กเสร็จแล้วในวันนั้น (ดูจาก id ต้นฉบับ)
+      const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+      const alreadyExists = tasks.some(t => t.title === task.title && t.date === dateStr && t.id !== task.id);
+      if (alreadyExists) continue;
+
+      expanded.push({
+        ...task,
+        id: `${task.id}-recur-${dateStr}`,
+        date: dateStr,
+        done: false,
+        status: 'todo',
+        isRecurringInstance: true,
+      });
+    }
+  }
+
+  return expanded;
+}
 
 // ── Priority color map ──────────────────────────────────────────
 const PRIORITY_STYLES = {
@@ -160,7 +208,7 @@ function MonthView({ tasks, currentDate }) {
                     return (
                       <div key={t.id} className="text-[10px] sm:text-xs font-bold px-2 py-1.5 rounded-lg truncate transition-all flex items-center gap-1"
                            style={{ backgroundColor: bg, color }}>
-                        {t.done ? '✓ ' : ''}{t.title}
+                        {t.done ? '✓ ' : ''}{t.isRecurringInstance && <Repeat size={9} />}{t.title}
                       </div>
                     );
                   })}
@@ -177,7 +225,28 @@ function MonthView({ tasks, currentDate }) {
 export default function SchedulePage() {
   const [view, setView] = useState('Month');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const { tasks } = useTasks(); 
+  const { tasks } = useTasks();
+
+  // คำนวณ range ของเดือน/สัปดาห์ที่กำลังดูอยู่ แล้ว expand recurring tasks
+  const expandedTasks = useMemo(() => {
+    const { year, month } = getLocalDateInfo(currentDate);
+    if (view === 'Month') {
+      const rangeStart = getDateString(year, parseInt(month), 1);
+      const daysInMonth = new Date(year, parseInt(month), 0).getDate();
+      const rangeEnd = getDateString(year, parseInt(month), daysInMonth);
+      return expandRecurringTasks(tasks, rangeStart, rangeEnd);
+    } else {
+      // Week view
+      const { d, dayOfWeek } = getLocalDateInfo(currentDate);
+      const startOfWeek = new Date(d);
+      startOfWeek.setDate(d.getDate() - dayOfWeek);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const rangeStart = getDateString(startOfWeek.getFullYear(), startOfWeek.getMonth() + 1, startOfWeek.getDate());
+      const rangeEnd = getDateString(endOfWeek.getFullYear(), endOfWeek.getMonth() + 1, endOfWeek.getDate());
+      return expandRecurringTasks(tasks, rangeStart, rangeEnd);
+    }
+  }, [tasks, currentDate, view]);
 
   const weekDays = useMemo(() => {
     const { d, dayOfWeek } = getLocalDateInfo(currentDate);
@@ -257,9 +326,9 @@ export default function SchedulePage() {
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        {view === 'Month' ? <MonthView tasks={tasks} currentDate={currentDate} /> : (
+        {view === 'Month' ? <MonthView tasks={expandedTasks} currentDate={currentDate} /> : (
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-7 gap-4 pb-12">
-            {weekDays.map((day) => <WeekColumn key={day.fullDateStr} day={day} tasks={tasks} />)}
+            {weekDays.map((day) => <WeekColumn key={day.fullDateStr} day={day} tasks={expandedTasks} />)}
           </div>
         )}
       </div>
