@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TaskProvider } from './contexts/TaskContext'; // เพิ่มการ Import
 import Layout from './components/Layout';
-import LoginPage from './pages/loginPage'; // ปรับ l เล็กตามโครงสร้างไฟล์จริง
+import LoginPage from './pages/LoginPage'; // ปรับเป็น PascalCase ให้ตรงกับไฟล์จริง
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

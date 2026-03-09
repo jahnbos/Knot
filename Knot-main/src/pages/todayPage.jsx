@@ -21,8 +21,7 @@ import {
   Trash2,
   StickyNote,
   Brain,
-  Send,
-  Repeat
+  Send
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTasks } from '../contexts/TaskContext';
@@ -164,10 +163,10 @@ function PomodoroModal({ isOpen, onClose, task, onCompleteTask }) {
 
         <button 
           onClick={() => setIsScratchpadOpen(!isScratchpadOpen)}
-          className="h-14 w-14 rounded-full transition-all cursor-pointer shadow-2xl flex items-center justify-center group hover:scale-110 active:scale-95"
+          className="h-20 w-20 rounded-full transition-all cursor-pointer shadow-2xl flex items-center justify-center group hover:scale-110 active:scale-95"
           style={{ backgroundColor: 'var(--accent)', color: 'white' }}
         >
-          <StickyNote size={24} className="group-hover:rotate-12 transition-transform" />
+          <StickyNote size={32} className="group-hover:rotate-12 transition-transform" />
           <span className="absolute right-full mr-4 px-4 py-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl" style={{ color: 'var(--text-primary)' }}>
             จดไว้ก่อน
           </span>
@@ -253,123 +252,67 @@ function PomodoroModal({ isOpen, onClose, task, onCompleteTask }) {
 function SubtasksModal({ isOpen, onClose, task, onUpdateTask }) {
   if (!isOpen || !task) return null;
 
-  const subtasksTotal = task.subtasks?.length ?? 0;
-
-  const PRIORITY_MAP = {
-    high:   { label: 'สำคัญ',  color: '#ef4444', bg: 'rgba(239,68,68,0.1)'   },
-    medium: { label: 'ปกติ',   color: '#f59e0b', bg: 'rgba(245,158,11,0.1)'  },
-    low:    { label: 'ไม่รีบ', color: '#0d9488', bg: 'rgba(13,148,136,0.1)'  },
-  };
-  const p = PRIORITY_MAP[task.priority] ?? PRIORITY_MAP.low;
-
-  const formatDate = (d) => {
-    if (!d) return null;
-    return new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(d));
-  };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-md bg-black/50 p-4 animate-in fade-in duration-200" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
-           style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', borderTop: `3px solid ${p.color}` }}
-           onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-md bg-black/40 p-4 animate-in fade-in duration-200" onClick={onClose}>
+      <div className="w-full max-w-lg bg-[var(--bg-primary)] border border-[var(--border)] rounded-3xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Modal Header */}
+        <div className="px-6 py-5 border-b flex justify-between items-center bg-[var(--bg-secondary)]" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-3">
+            <ListTodo size={24} className="text-[var(--accent)]" />
+            <h2 className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>รายละเอียดงาน</h2>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]">
+            <X size={22} />
+          </button>
+        </div>
 
-        {/* ── Header ── */}
-        <div className="px-7 pt-6 pb-5 flex justify-between items-start">
-          <div className="flex-1 pr-4">
-            {/* Category badge */}
+        <div className="p-6 space-y-6">
+          {/* Task Title Section */}
+          <div className="space-y-2">
+            <p className="text-xs font-bold uppercase tracking-widest opacity-50" style={{ color: 'var(--text-secondary)' }}>งาน</p>
+            <h3 className="font-bold text-2xl leading-snug" style={{ color: 'var(--text-primary)' }}>{task.title}</h3>
             {task.task && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3"
+              <span className="inline-block mt-2 px-4 py-1.5 rounded-lg text-sm font-bold" 
                     style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                 {task.task}
               </span>
             )}
-            <h2 className="text-2xl font-black leading-snug" style={{ color: 'var(--text-primary)' }}>
-              {task.title}
-            </h2>
           </div>
-          <button onClick={onClose}
-                  className="shrink-0 p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors cursor-pointer mt-1"
-                  style={{ color: 'var(--text-muted)' }}>
-            <X size={20} />
-          </button>
-        </div>
 
-        {/* ── Info chips ── */}
-        <div className="px-7 flex flex-wrap gap-2 mb-6">
-          {/* Priority */}
-          <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                style={{ backgroundColor: p.bg, color: p.color }}>
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-            {p.label}
-          </span>
-          {/* Time */}
-          {task.time && (
-            <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                  style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-              <Clock size={12} /> {task.time} น.
-            </span>
-          )}
-          {/* Date */}
-          {task.date && (
-            <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                  style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-              <CalendarDays size={12} /> {formatDate(task.date)}
-            </span>
-          )}
-          {/* Done status */}
-          <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                style={{ backgroundColor: task.done ? 'rgba(20,184,166,0.1)' : 'var(--bg-tertiary)',
-                         color: task.done ? '#0d9488' : 'var(--text-muted)' }}>
-            {task.done ? <CheckCircle2 size={12} /> : <Square size={12} />}
-            {task.done ? 'เสร็จแล้ว' : 'ยังไม่เสร็จ'}
-          </span>
-        </div>
-
-        {/* ── Subtasks ── */}
-        <div className="px-7 pb-7">
-          <div className="rounded-2xl overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
-            {/* Subtask header + progress */}
-            <div className="px-5 py-4 flex items-center justify-between border-b"
-                 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
-              <div className="flex items-center gap-2">
-                <ListTodo size={16} className="text-[var(--accent)]" />
-                <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>งานย่อย</span>
-              </div>
-            </div>
-
-            {/* Subtask list */}
-            {subtasksTotal > 0 ? (
-              <div className="divide-y" style={{ '--tw-divide-opacity': 1 }}>
-                {task.subtasks.map((sub) => (
-                  <div key={sub.id}
-                       className="flex items-center gap-3 px-5 py-4"
-                       style={{ borderColor: 'var(--border)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--accent)' }} />
-                    <span className="flex-1 font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {sub.text}
-                    </span>
+          {/* Subtasks List */}
+          <div className="space-y-2 mt-4">
+            <p className="text-xs font-bold uppercase tracking-widest opacity-50 mb-3" style={{ color: 'var(--text-secondary)' }}>รายละเอียดเพิ่มเติม</p>
+            {task.subtasks && task.subtasks.length > 0 ? (
+              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                {task.subtasks.map((sub, idx) => (
+                  <div key={sub.id} 
+                       className="flex items-start gap-4 p-4 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border)]">
+                     <div className="mt-1 w-7 h-7 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] font-bold text-sm shrink-0">
+                        {idx + 1}
+                     </div>
+                     <span className="flex-1 text-lg font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                       {sub.text}
+                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-10 text-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                <p className="text-sm font-medium opacity-40" style={{ color: 'var(--text-secondary)' }}>
-                  ไม่มีงานย่อย
-                </p>
+              <div className="text-center py-10 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border)] border-dashed">
+                <p className="text-lg font-medium opacity-50" style={{ color: 'var(--text-secondary)' }}>ไม่มีรายละเอียดเพิ่มเติม</p>
               </div>
             )}
           </div>
         </div>
-
-        {/* ── Footer ── */}
-        <div className="px-7 pb-6">
-          <button onClick={onClose}
-                  className="w-full py-3.5 rounded-2xl font-black text-white transition-all hover:opacity-90 active:scale-95 cursor-pointer"
-                  style={{ backgroundColor: 'var(--accent)' }}>
-            ปิด
+        
+        {/* Footer */}
+        <div className="px-6 py-5 bg-[var(--bg-secondary)] border-t text-center" style={{ borderColor: 'var(--border)' }}>
+          <button onClick={onClose} 
+                  className="w-full py-3.5 rounded-2xl text-lg font-bold bg-[var(--bg-primary)] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-all"
+                  style={{ color: 'var(--text-primary)' }}>
+            เข้าใจแล้ว
           </button>
         </div>
-
       </div>
     </div>
   );
@@ -534,8 +477,8 @@ export default function TodayPage() {
             <span className="text-[var(--accent)] tabular-nums">{animatedPct}%</span>
           </div>
           <div className="h-4 w-full bg-[var(--bg-tertiary)] rounded-full overflow-hidden shadow-inner">
-            <div className="h-full bg-gradient-to-r from-[var(--accent)] to-[#00B4D8] rounded-full transition-none" 
-                 style={{ width: barReady ? `${animatedPct}%` : '0%' }} />
+            <div className="h-full bg-gradient-to-r from-[var(--accent)] to-[#00B4D8] rounded-full transition-all duration-1000 ease-out" 
+                 style={{ width: barReady ? `${targetPct}%` : '0%' }} />
           </div>
           <p className="mt-4 font-medium opacity-60" style={{ color: 'var(--text-secondary)' }}>
             ทำเสร็จแล้ว <span className="tabular-nums">{animatedCompleted}</span> จากทั้งหมด {todayTasks.length} งาน
@@ -579,12 +522,6 @@ export default function TodayPage() {
                                'bg-[var(--accent)]'
                             }`} />
                           </div>
-                        )}
-                        {task.recurring && task.recurring !== 'none' && (
-                          <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full"
-                                style={{ backgroundColor: 'var(--accent)/10', color: 'var(--accent)', background: 'rgba(20,184,166,0.12)' }}>
-                            <Repeat size={10} /> {{ daily: 'ทุกวัน', weekly: 'ทุกสัปดาห์', monthly: 'ทุกเดือน' }[task.recurring]}
-                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-sm font-bold opacity-50" style={{ color: 'var(--text-secondary)' }}>
